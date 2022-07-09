@@ -25,4 +25,4 @@ button.switch_to_input(pull=digitalio.Pull.UP)
 
 while True:
     led.value = button.value
-    time.sleep(0.01) # debounce
+    time.sleep(0.01)  # debounce

@@ -19,6 +19,6 @@ pcf.write_gpio(0xFF)
 while True:
     vals = pcf.read_gpio()
     for b in range(8):
-        if not (vals & 1 << b):
+        if not vals & (1 << b):
             print("button #%d pressed" % b)
-    time.sleep(0.01) # debounce delay
+    time.sleep(0.01)  # debounce delay
