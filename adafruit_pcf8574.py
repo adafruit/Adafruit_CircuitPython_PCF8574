@@ -43,6 +43,7 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PCF8574.git"
 
 PCF8574_I2CADDR_DEFAULT: int = const(0x20)  # Default I2C address
 
+
 class PCF8574:
     """
     Interface library for PCF8574 GPIO expanders
@@ -68,25 +69,30 @@ class PCF8574:
         return DigitalInOut(pin, self)
 
     def write_gpio(self, val):
+        """Write a full 8-bit value to the GPIO register"""
         self._writebuf[0] = val & 0xFF
         with self.i2c_device as i2c:
             i2c.write(self._writebuf)
 
     def read_gpio(self):
+        """Read the full 8-bits of data from the GPIO register"""
         with self.i2c_device as i2c:
             i2c.readinto(self._readbuf)
         return self._readbuf[0]
 
     def write_pin(self, pin, val):
+        """Set a single GPIO pin high/pulled-up or driven low"""
         if val:
-            # turn on the pullup (write high) 
+            # turn on the pullup (write high)
             self.write_gpio(self._writebuf[0] | (1 << pin))
         else:
             # turn on the transistor (write low)
             self.write_gpio(self._writebuf[0] & ~(1 << pin))
 
     def read_pin(self, pin):
+        """Read a single GPIO pin as high/pulled-up or driven low"""
         return (self.read_gpio() >> pin) & 0x1
+
 
 """
 `digital_inout`
@@ -94,6 +100,7 @@ class PCF8574:
 Digital input/output of the PCF8574.
 * Author(s): Tony DiCola
 """
+
 
 class DigitalInOut:
     """Digital input/output of the PCF8574.  The interface is exactly the
@@ -109,7 +116,9 @@ class DigitalInOut:
         """Specify the pin number of the PCF8574 0..7, and instance."""
         self._pin = pin_number
         self._pcf = pcf
-        self._dir = digitalio.Direction.INPUT  # this is meaningless but we need something!
+        self._dir = (
+            digitalio.Direction.INPUT
+        )  # this is meaningless but we need something!
 
     # kwargs in switch functions below are _necessary_ for compatibility
     # with DigitalInout class (which allows specifying pull, etc. which
@@ -125,7 +134,7 @@ class DigitalInOut:
 
     def switch_to_input(self, pull=None, **kwargs):
         """Switch the pin state to a digital input which is the same as
-        setting the light pullup on.  Note that true tri-state or 
+        setting the light pullup on.  Note that true tri-state or
         pull-down resistors are NOT supported!
         """
         self.direction = digitalio.Direction.INPUT
@@ -168,7 +177,7 @@ class DigitalInOut:
     @property
     def pull(self):
         """
-        Pull-up is always activated so always return the same thing       
+        Pull-up is always activated so always return the same thing
         """
         return digitalio.Pull.UP
 
