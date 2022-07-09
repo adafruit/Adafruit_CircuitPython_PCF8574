@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 """
 `adafruit_pcf8574`
-================================================================================
+==================
 
 Python library for PCF8574 GPIO expander
 
@@ -16,7 +16,7 @@ Implementation Notes
 
 **Hardware:**
 
-* `Adafruit PCF8574 GPIO Expander <https://www.adafruit.com/product/5545>`
+* `Adafruit PCF8574 GPIO Expander <https://www.adafruit.com/product/5545>`_
 
 **Software and Dependencies:**
 
@@ -105,9 +105,11 @@ Digital input/output of the PCF8574.
 class DigitalInOut:
     """Digital input/output of the PCF8574.  The interface is exactly the
     same as the digitalio.DigitalInOut class, however:
-      * PCF8574 does not support pull-down resistors
-      * PCF8574 does not actually have a sourcing transistor, instead there's
-      an internal pullup
+
+      - PCF8574 does not support pull-down resistors
+      - PCF8574 does not actually have a sourcing transistor, instead there's
+        an internal pullup
+
     Exceptions will be thrown when attempting to set unsupported pull
     configurations.
     """
