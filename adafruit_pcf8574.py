@@ -55,7 +55,9 @@ class PCF8574:
     ) -> None:
         self.i2c_device = I2CDevice(i2c_bus, address)
         self._writebuf = bytearray(1)
+        self._writebuf[0] = 0
         self._readbuf = bytearray(1)
+        self._readbuf[0] = 0
 
     def get_pin(self, pin):
         """Convenience function to create an instance of the DigitalInOut class
@@ -75,25 +77,23 @@ class PCF8574:
             i2c.readinto(self._readbuf)
         return self._readbuf[0]
 
+    def write_pin(self, pin, val):
+        if val:
+            # turn on the pullup (write high) 
+            self.write_gpio(self._writebuf[0] | (1 << pin))
+        else:
+            # turn on the transistor (write low)
+            self.write_gpio(self._writebuf[0] & ~(1 << pin))
+
+    def read_pin(self, pin):
+        return (self.read_gpio() >> pin) & 0x1
+
 """
 `digital_inout`
 ====================================================
-Digital input/output of the MCP230xx.
+Digital input/output of the PCF8574.
 * Author(s): Tony DiCola
 """
-
-# Internal helpers to simplify setting and getting a bit inside an integer.
-def _get_bit(val, bit):
-    return val & (1 << bit) > 0
-
-
-def _enable_bit(val, bit):
-    return val | (1 << bit)
-
-
-def _clear_bit(val, bit):
-    return val & ~(1 << bit)
-
 
 class DigitalInOut:
     """Digital input/output of the PCF8574.  The interface is exactly the
@@ -109,6 +109,7 @@ class DigitalInOut:
         """Specify the pin number of the PCF8574 0..7, and instance."""
         self._pin = pin_number
         self._pcf = pcf
+        self._dir = digitalio.Direction.INPUT  # this is meaningless but we need something!
 
     # kwargs in switch functions below are _necessary_ for compatibility
     # with DigitalInout class (which allows specifying pull, etc. which
@@ -123,8 +124,8 @@ class DigitalInOut:
         self.value = value
 
     def switch_to_input(self, pull=None, **kwargs):
-        """Switch the pin state to a digital input with the provided starting
-        pull-up resistor state (optional, no pull-up by default) and input polarity.  Note that
+        """Switch the pin state to a digital input which is the same as
+        setting the light pullup on.  Note that true tri-state or 
         pull-down resistors are NOT supported!
         """
         self.direction = digitalio.Direction.INPUT
@@ -134,46 +135,47 @@ class DigitalInOut:
 
     @property
     def value(self):
-        """The value of the pin, either True for high or False for
-        low.  Note you must configure as an output or input appropriately
-        before reading and writing this value.
+        """The value of the pin, either True for high/pulled-up or False for
+        low.
         """
-        return _get_bit(self._aw.inputs, self._pin)
+        return self._pcf.read_pin(self._pin)
 
     @value.setter
     def value(self, val):
-        if val:
-            self._aw.outputs = _enable_bit(self._aw.outputs, self._pin)
-        else:
-            self._aw.outputs = _clear_bit(self._aw.outputs, self._pin)
+        self._pcf.write_pin(self._pin, val)
 
     @property
     def direction(self):
-        """The direction of the pin, either True for an input or
-        False for an output.
         """
-        if _get_bit(self._aw.direction, self._pin):
-            return digitalio.Direction.INPUT
-        return digitalio.Direction.OUTPUT
+        Setting a pin to OUTPUT drives it low, setting it to
+        an INPUT enables the light pullup.
+        """
+        return self._dir
 
     @direction.setter
     def direction(self, val):
         if val == digitalio.Direction.INPUT:
-            self._aw.directions = _clear_bit(self._aw.directions, self._pin)
-
+            # for inputs, turn on the pullup (write high)
+            self._pcf.write_pin(self._pin, True)
+            self._dir = val
         elif val == digitalio.Direction.OUTPUT:
-            self._aw.directions = _enable_bit(self._aw.directions, self._pin)
+            # for outputs, turn on the transistor (write low)
+            self._pcf.write_pin(self._pin, False)
+            self._dir = val
         else:
             raise ValueError("Expected INPUT or OUTPUT direction!")
 
     @property
     def pull(self):
         """
-        Pull-down resistors are NOT supported!
+        Pull-up is always activated so always return the same thing       
         """
-        raise NotImplementedError("Pull-down resistors not supported.")
+        return digitalio.Pull.UP
 
     @pull.setter
-    def pull(self, val):  # pylint: disable=no-self-use
-        if val is not None:
-            raise NotImplementedError("Pull-up/pull-down resistors not supported.")
+    def pull(self, val):
+        if val is digitalio.Pull.UP:
+            # for inputs, turn on the pullup (write high)
+            self._pcf.write_pin(self._pin, True)
+        else:
+            raise NotImplementedError("Pull-down resistors not supported.")
