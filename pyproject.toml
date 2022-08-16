@@ -12,7 +12,7 @@ requires = [
 [project]
 name = "adafruit-circuitpython-pcf8574"
 description = "Python library for PCF8574 GPIO expander"
-version = "0.0.0-auto.0"
+version = "0.0.0+auto.0"
 readme = "README.rst"
 authors = [
     {name = "Adafruit Industries", email = "circuitpython@adafruit.com"}
