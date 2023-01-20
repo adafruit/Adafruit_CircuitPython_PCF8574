@@ -88,7 +88,7 @@ class PCF8574:
             # turn on the transistor (write low)
             self.write_gpio(self._writebuf[0] & ~(1 << pin))
 
-    def read_pin(self, pin: int) -> int:
+    def read_pin(self, pin: int) -> bool:
         """Read a single GPIO pin as high/pulled-up or driven low"""
         return (self.read_gpio() >> pin) & 0x1
 
@@ -126,7 +126,7 @@ class DigitalInOut:
     # is unused by this class).  Do not remove them, instead turn off pylint
     # in this case.
     # pylint: disable=unused-argument
-    def switch_to_output(self, value: digitalio.Pull = False, **kwargs) -> None:
+    def switch_to_output(self, value: bool = False, **kwargs) -> None:
         """Switch the pin state to a digital output with the provided starting
         value (True/False for high or low, default is False/low).
         """
@@ -176,14 +176,14 @@ class DigitalInOut:
             raise ValueError("Expected INPUT or OUTPUT direction!")
 
     @property
-    def pull(self) -> digitalio.Pull:
+    def pull(self) -> digitalio.Pull.UP:
         """
         Pull-up is always activated so always return the same thing
         """
         return digitalio.Pull.UP
 
     @pull.setter
-    def pull(self, val: digitalio.Pull) -> None:
+    def pull(self, val: digitalio.Pull.UP) -> None:
         if val is digitalio.Pull.UP:
             # for inputs, turn on the pullup (write high)
             self._pcf.write_pin(self._pin, True)
