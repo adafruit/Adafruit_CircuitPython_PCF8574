@@ -85,7 +85,7 @@ following command to install:
 
 .. code-block:: shell
 
-    circup install pcf8574
+    circup install adafruit_pcf8574
 
 Or the following command to update an existing version:
 
