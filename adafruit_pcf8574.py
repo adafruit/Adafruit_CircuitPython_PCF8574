@@ -90,7 +90,7 @@ class PCF8574:
 
     def read_pin(self, pin: int) -> bool:
         """Read a single GPIO pin as high/pulled-up or driven low"""
-        return (self.read_gpio() >> pin) & 0x1
+        return ((self.read_gpio() >> pin) & 0x1) == 1
 
 
 """
