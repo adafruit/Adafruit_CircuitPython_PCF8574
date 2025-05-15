@@ -4,8 +4,10 @@
 # SPDX-License-Identifier: Unlicense
 
 import time
+
 import board
 import digitalio
+
 import adafruit_pcf8574
 
 print("PCF8574 digitalio LED + button test")
