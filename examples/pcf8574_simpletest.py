@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: Unlicense
 
 import time
+
 import board
+
 import adafruit_pcf8574
 
 print("PCF8574 digitalio LED blink test")

@@ -29,14 +29,15 @@ Implementation Notes
 try:
     # This is only needed for typing
     from typing import Optional
+
     from busio import I2C
 except ImportError:
     pass
 
 
+import digitalio
 from adafruit_bus_device.i2c_device import I2CDevice
 from micropython import const
-import digitalio
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PCF8574.git"
@@ -117,15 +118,11 @@ class DigitalInOut:
         """Specify the pin number of the PCF8574 0..7, and instance."""
         self._pin = pin_number
         self._pcf = pcf
-        self._dir = (
-            digitalio.Direction.INPUT
-        )  # this is meaningless but we need something!
+        self._dir = digitalio.Direction.INPUT  # this is meaningless but we need something!
 
     # kwargs in switch functions below are _necessary_ for compatibility
     # with DigitalInout class (which allows specifying pull, etc. which
-    # is unused by this class).  Do not remove them, instead turn off pylint
-    # in this case.
-    # pylint: disable=unused-argument
+    # is unused by this class).
     def switch_to_output(self, value: bool = False, **kwargs) -> None:
         """Switch the pin state to a digital output with the provided starting
         value (True/False for high or low, default is False/low).
